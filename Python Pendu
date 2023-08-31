@@ -1,0 +1,91 @@
+'''
+Auteur : Esteban
+Date : 31.08.2023
+Description : Faire un pendu
+Version : 1.0
+'''
+
+import random
+import tkinter as tk
+from tkinter import messagebox
+
+# Liste de mots possibles
+mots = ["python", "programmation", "ordinateur", "developpement", "intelligence"]
+
+class PenduGame:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Jeu du Pendu")
+
+        self.mot_a_deviner = random.choice(mots)
+        self.lettres_devinees = []
+        self.essais_restants = 6
+
+        self.canvas = tk.Canvas(root, width=400, height=400)
+        self.canvas.pack()
+
+        self.mot_label = tk.Label(root, text=self.afficher_mot_cache())
+        self.mot_label.pack()
+
+        self.lettre_entry = tk.Entry(root)
+        self.lettre_entry.pack()
+
+        self.deviner_button = tk.Button(root, text="Deviner", command=self.deviner_lettre)
+        self.deviner_button.pack()
+
+    def afficher_mot_cache(self):
+        mot_cache = ""
+        for lettre in self.mot_a_deviner:
+            if lettre in self.lettres_devinees:
+                mot_cache += lettre + " "
+            else:
+                mot_cache += "_ "
+        return mot_cache
+
+    def deviner_lettre(self):
+        lettre = self.lettre_entry.get().lower()
+        self.lettre_entry.delete(0, tk.END)
+
+        if lettre in self.lettres_devinees:
+            messagebox.showinfo("Lettre déjà devinée", "Vous avez déjà deviné cette lettre.")
+            return
+
+        self.lettres_devinees.append(lettre)
+        if lettre in self.mot_a_deviner:
+            self.mot_label.config(text=self.afficher_mot_cache())
+        else:
+            self.essais_restants -= 1
+            self.dessiner_pendu()
+
+        if self.mot_a_deviner == self.afficher_mot_cache().replace(" ", ""):
+            messagebox.showinfo("Félicitations", "Vous avez deviné le mot!")
+            self.root.destroy()
+
+        if self.essais_restants == 0:
+            messagebox.showinfo("Partie terminée", "Désolé, vous avez épuisé tous vos essais. Le mot était: " + self.mot_a_deviner)
+            self.root.destroy()
+
+    def dessiner_pendu(self):
+        pendu_parts = [
+            self.canvas.create_line(50, 350, 150, 350),
+            self.canvas.create_line(100, 350, 100, 100),
+            self.canvas.create_line(100, 100, 250, 100),
+            self.canvas.create_line(250, 100, 250, 150)
+        ]
+        if self.essais_restants <= 5:
+            pendu_parts.append(self.canvas.create_oval(225, 150, 275, 200))
+        if self.essais_restants <= 4:
+            pendu_parts.append(self.canvas.create_line(250, 200, 250, 300))
+        if self.essais_restants <= 3:
+            pendu_parts.append(self.canvas.create_line(250, 250, 230, 230))
+        if self.essais_restants <= 2:
+            pendu_parts.append(self.canvas.create_line(250, 250, 270, 230))
+        if self.essais_restants <= 1:
+            pendu_parts.append(self.canvas.create_line(250, 300, 230, 330))
+        if self.essais_restants <= 0:
+            pendu_parts.append(self.canvas.create_line(250, 300, 270, 330))
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    game = PenduGame(root)
+    root.mainloop()
